@@ -1,0 +1,10 @@
+name = "navier_stoke_solver"
+version = "0.1.0"
+
+[build]
+auto-executables = true
+auto-tests = false
+auto-examples = false
+
+[[executable]]
+name = "solver"
