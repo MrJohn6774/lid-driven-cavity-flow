@@ -58,7 +58,7 @@ program main
             psi_old = psi
             do i = 2, nx-1
                 do j = 2, ny-1
-                    rhs = (dx*dy)**2 * omega(i, j) + dx**2 * psi(i, j+1) + psi(i, j-1) + dy**2 * (psi(i+1, j) + psi(i-1, j))
+                    rhs = (dx*dy)**2 * omega(i, j) + dx**2 * (psi(i, j+1) + psi(i, j-1)) + dy**2 * (psi(i+1, j) + psi(i-1, j))
                     rhs = beta * rhs / (2.0 * (dx**2 + dy**2))
                     psi(i, j) = rhs + (1 - beta) * psi(i, j)
                 end do
@@ -103,8 +103,8 @@ program main
     end do
 
     ! Save psi to file
-    do i = 1, nx
-        do j = 1, ny
+    do j = 1, ny
+        do i = 1, nx
             write(10, '(E20.10)') psi(i, j)
         end do
         write(10, *)
