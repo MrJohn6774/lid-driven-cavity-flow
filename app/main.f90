@@ -40,18 +40,13 @@ program main
     ! Vorticity on left wall
     omega(1, 2:ny-1) = -2.0d0 * psi(2, 2:ny-1) / (dx * dx)
 
-
-    open(unit=10, file='psi.dat', status='replace')
-    open(unit=11, file='err.dat', status='replace')
-    open(unit=12, file='omega.dat', status='replace')
-
     do while (t < t_end)
         ! first find psi by solving the Poisson equation
         iter_num = 0
         err = 1e3
         do while (err > tol)
             if (iter_num > iter_max) then
-                print *, "Exceed max iteration: ", iter_max, " at t=", t
+                print *, "Exceed max iteration: ", iter_max, " at t =", t, " err = ", err
                 exit
             end if
 
@@ -65,22 +60,13 @@ program main
             end do
             err = norm_frobenius(psi - psi_old, nx, ny)
             iter_num = iter_num + 1
-            write(11, '(I2, E20.10, E20.10)') iter_num, err, rhs
         end do
 
-        ! print *, psi
-        ! exit
-        write(11, *)
-
         ! update omega
-        ! C_x = -(psi(3:nx, 2:ny-1) - psi(1:nx-2,2:ny-1)) / 2.0 / dy * (omega(2:nx-1,3:ny) - omega(2:nx-1,1:ny-2)) / 2.0 / dx
         C_x = -(psi(2:nx-1, 3:ny) - psi(2:nx-1,1:ny-2)) / 2.0 / dy * (omega(3:nx,2:ny-1) - omega(1:nx-2,2:ny-1)) / 2.0 / dx
 
-        ! C_y  =  (omega(3:nx, 2:ny-1) - omega(1:nx-2,2:ny-1)) / 2.0 / dy * (psi(2:nx-1,3:ny) - psi(2:nx-1,1:ny-2)) / 2.0 / dx
         C_y  =  (omega(2:nx-1, 3:ny) - omega(2:nx-1,1:ny-2)) / 2.0 / dy * (psi(3:nx,2:ny-1) - psi(1:nx-2,2:ny-1)) / 2.0 / dx
 
-        ! D_xy =  (omega(2:nx-1, 3:ny) - 2.0*omega(2:nx-1,2:ny-1) + omega(2:nx-1,1:ny-2)) / dx / dx + (omega(3:nx,2:ny-1) &
-        !         -2.0 * omega(2:nx-1,2:ny-1) + omega(1:nx-2,2:ny-1)) / dy / dy
         D_xy =  (omega(3:nx, 2:ny-1) - 2.0*omega(2:nx-1,2:ny-1) + omega(1:nx-2,2:ny-1)) / dx / dx + (omega(2:nx-1,3:ny) &
         -2.0 * omega(2:nx-1,2:ny-1) + omega(2:nx-1,1:ny-2)) / dy / dy
 
@@ -94,24 +80,23 @@ program main
 
         ! update time
         t = t + dt
-
-        !print omega
-        do j = 1, ny
-            write(12, *) omega(:, j)
-        end do
-        write(12, *)
     end do
 
-    ! Save psi to file
+    ! Save results to files
+    open(unit=10, file='psi.dat', status='replace')
+    open(unit=11, file='omega.dat', status='replace')
+
     do j = 1, ny
         do i = 1, nx
             write(10, '(E20.10)') psi(i, j)
+            write(11, '(E20.10)') omega(i, j)
         end do
         write(10, *)
+        write(11, *)
     end do
+
     close(10)
     close(11)
-    close(12)
 
     deallocate(psi, omega, psi_old)
 
