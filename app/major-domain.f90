@@ -1,7 +1,7 @@
-  module mpi_domain
+  module mpi_mod
   use mpi
   implicit none
-  integer:: rank=0, nproc=6, npx, npy
+  integer:: rank=0, nproc, npx, npy
   integer:: COMM_CART, xyrank(2) = 0
   integer:: nx, ny
   integer:: UR = -1, DR = -1, LR = -1, RR = -1
@@ -17,13 +17,18 @@
   implicit none
   call MPI_INIT( ierr )
   !call MPI_COMM_RANK( MPI_COMM_WORLD, rank, ierr )
-  call MPI_COMM_SIZE( MPI_COMM_WORLD, nproc, ierr )
 
   ! read file
   open(10, file='input.txt', status='old', action='read')
   read(10,*)
   read(10,*) npx, npy, nx, ny
   close(10)
+  
+  nproc = npx * npy
+ 
+  call MPI_COMM_SIZE( MPI_COMM_WORLD, nproc, ierr )
+ 
+  
   ! allocate work domain
   allocate(xwork(npx+1), ywork(npy+1))
   call distributeWork(xwork, npx, nx-2)
@@ -229,6 +234,6 @@
     close(10)
   end if
 
-  if(rank==0) write(*,"(a,f10.3)") 'wtime = ', time2-time1
+  if(rank==0) write(*,"(a,f10.6)") 'wtime = ', time2-time1
   call MPI_FINALIZE(ierr)
   end program
