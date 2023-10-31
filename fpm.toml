@@ -1,10 +1,18 @@
 name = "navier_stoke_solver"
 version = "0.1.0"
 
+[dependencies]
+mpi = "*"
+
 [build]
 auto-executables = true
 auto-tests = false
 auto-examples = false
+link = ["mpi"]
 
 [[executable]]
 name = "solver"
+
+[fortran]
+implicit-external=true
+implicit-typing=true
