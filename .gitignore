@@ -1,2 +1,5 @@
 build
 *.dat
+*.csv
+*.mod
+*.smod

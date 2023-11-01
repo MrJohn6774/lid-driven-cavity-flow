@@ -1,7 +1,7 @@
 program main
     implicit none
 
-    integer, parameter :: nx = 21, ny = 21, iter_max = 30
+    integer, parameter :: nx = 21, ny = 21, iter_max = 100
     real(8), parameter :: lx = 1.0d0, ly = 1.0d0, Ut = 5.0d0, Ub = 0.0d0, Vl = 0.0d0, Vr = 0.0d0, beta = 1.5, nu = 0.05
     real(8) :: dx, dy, dt, rhs, tol, t, t_end, err
     real(8), allocatable :: psi(:,:), omega(:,:), psi_old(:,:), C_x(:,:), C_y(:,:), D_xy(:,:)

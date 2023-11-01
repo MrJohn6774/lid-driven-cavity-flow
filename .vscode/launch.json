@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "(gdb) Fortran",
+        "name": "(gdb) Serial Solver",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/build/gfortran_E167FD2A985B468F/app/solver",
+        "program": "${workspaceFolder}/build/gfortran_6FB96CAE7088C0B9/app/solver_serial",
         "args": [], // Possible input args for a.out
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",

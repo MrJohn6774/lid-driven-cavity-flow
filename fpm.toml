@@ -11,7 +11,11 @@ auto-examples = false
 link = ["mpi"]
 
 [[executable]]
-name = "solver"
+name = "solver_serial"
+
+[[executable]]
+name = "solver_parallel"
+main = "major-domain.f90"
 
 [fortran]
 implicit-external=true

@@ -1,6 +1,8 @@
   module mpi_mod
-  use mpi
   implicit none
+
+  include 'mpif.h'
+
   integer:: rank=0, nproc, npx, npy
   integer:: COMM_CART, xyrank(2) = 0
   integer:: nx, ny
@@ -45,8 +47,8 @@
   iy1 = ywork(xyrank(1))
   iy2 = ywork(xyrank(1)+1) - 1
   ! get rank
-  call MPI_CART_SHIFT(COMM_CART, 0, 1, DR, UR, ierr) !обио
-  call MPI_CART_SHIFT(COMM_CART, 1, 1, LR, RR, ierr) !вСср
+  call MPI_CART_SHIFT(COMM_CART, 0, 1, DR, UR, ierr) ! down and up
+  call MPI_CART_SHIFT(COMM_CART, 1, 1, LR, RR, ierr) ! left and right
   end subroutine
 
   !allocate task to different processor
@@ -103,7 +105,7 @@
 
   end module
 
-  program Test
+  program solver_parallel
   use mpi_mod
   implicit none
   real(8):: lx, ly, dx, dy
@@ -236,4 +238,4 @@
 
   if(rank==0) write(*,"(a,f10.6)") 'wtime = ', time2-time1
   call MPI_FINALIZE(ierr)
-  end program
+  end program solver_parallel
