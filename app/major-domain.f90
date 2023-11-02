@@ -168,13 +168,14 @@
   beta = 1.5d0
   nu = 0.05d0
   tol = 1.0d-3
-  dt = min(0.25d0*dx*dx/nu, 4.0d0*nu/Ut/Ut)
+  dt = 0.25d0*dx*dx/nu
+  !dt = min(0.25d0*dx*dx/nu, 4.0d0*nu/Ut/Ut)
   tend = 4 * dt
   if(rank==0) then
     write(*,"('dt = ', f7.4)") dt
     write(*,"('Reynods = ', f9.4)") Ut*lx/nu
   end if
-  dt = 0.008d0
+
 
   time1 = mpi_wtime()
   do while(t<tend)
@@ -223,11 +224,12 @@
   end do
   time2 = mpi_wtime()
 
-  !allocate(u(ny,nx), v(ny,nx))
-  !u = 0
-  !v = 0
-  !u(2:ny-1, 2:nx-1) = (psi(3:ny, 2:nx-1)-psi(1:ny-2, 2:nx-1)) / 2.0d0 / dy
-  !v(2:ny-1, 2:nx-1) = -(psi(2:ny-1, 3:nx) - psi(2:ny-1, 1:nx-2)) / 2.0d0 / dx
+  allocate(u(ny,nx), v(ny,nx))
+  u = 0
+  v = 0
+  u(ny, 2:nx-1) = Ut
+  u(2:ny-1, 2:nx-1) = (psi(3:ny, 2:nx-1)-psi(1:ny-2, 2:nx-1)) / 2.0d0 / dy
+  v(2:ny-1, 2:nx-1) = -(psi(2:ny-1, 3:nx) - psi(2:ny-1, 1:nx-2)) / 2.0d0 / dx
 
   ! output data
   write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') 'psi_', npx, '-', npy, '_', nx, '-', ny, '.csv'

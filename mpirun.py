@@ -25,8 +25,11 @@ def run_solver(npx, npy, nx, ny):
 
 def main():
     params_list = [
-        (2, 2, 21, 21),
-        (3, 2, 21, 21),
+        (2, 2, 300, 300),
+        (3, 2, 200, 200),
+        (3, 2, 100, 100),
+        (3, 2, 500, 500),
+        (3, 2, 1000, 1000)
     ]
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
