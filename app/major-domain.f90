@@ -133,6 +133,7 @@
   real(8):: lx, ly, dx, dy
   real(8):: Ut, Ub, Vl, Vr
   real(8):: t, dt, tol, beta, nu, tend, err, rhs
+  character(len=256) :: filename
   real(8), allocatable:: psi0(:,:), omega0(:,:), psi(:,:), omega(:,:)
   real(8), allocatable:: u(:,:), v(:,:)
   real(8) time1, time2
@@ -231,13 +232,15 @@
   !v(2:ny-1, 2:nx-1) = -(psi(2:ny-1, 3:nx) - psi(2:ny-1, 1:nx-2)) / 2.0d0 / dx
 
   ! output data
+  write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') 'psi_', npx, '-', npy, '_', nx, '-', ny, '.csv'
+
   if(xyrank(1)==1) iy1 = 1
   if(xyrank(1)==npy) iy2 = ny
   if(xyrank(2)==1) ix1 = 1
   if(xyrank(2)==npx) ix2 = nx
   do i = 0, nproc-1
     if(i==rank) then
-      open(10, file='res', access='stream')
+      open(10, file=filename, access='stream')
       do j = ix1, ix2
         do k = iy1, iy2
           write(10,pos=((j-1)*ny+k-1)*8+1) psi(k,j)
@@ -248,10 +251,10 @@
     call MPI_Barrier(COMM_CART, ierr)
   end do
   if(rank==0) then
-    open(10, file='res', access='stream')
+    open(10, file=filename, access='stream')
     read(10) psi(:,:)
     close(10,status='delete')
-    open(10, file='res.csv')
+    open(10, file=filename)
     do j = 1, ny
       write(10,"(*(g0,','))") psi(j,:)
     end do
