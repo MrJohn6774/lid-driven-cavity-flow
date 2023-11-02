@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -P COMPENG
-#PBS -l select=1:ncpus=24:mpiprocs=24:mem=4GB
-#PBS -l walltime=00:10:00
+#PBS -l select=1:ncpus=40:mpiprocs=40:mem=2GB
+#PBS -l walltime=00:02:00
 
 cd "$PBS_O_WORKDIR"
 module load python/3.6.5
