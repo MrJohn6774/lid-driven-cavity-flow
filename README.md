@@ -18,6 +18,9 @@ To build and run the executable
 
 # run the parallel solver with maximum number of available processors
 ./fpm run solver_parallel
+
+# run the parallel solver with mpirun
+mpirun -np 4 build/gfortran_6FB96CAE7088C0B9/app/solver_parallel 2 2 21 21
 ```
 
 To clean the build files and folders

@@ -9,6 +9,7 @@
   integer:: UR = -1, DR = -1, LR = -1, RR = -1
   integer ierr
   integer ix1, ix2, iy1, iy2
+  character(len=20) :: arg
   integer, allocatable:: xwork(:) !allocate tasks
   integer, allocatable:: ywork(:) 
   real(8), allocatable:: tempDat(:)
@@ -20,10 +21,25 @@
   call MPI_INIT( ierr )
 
   ! read input parameters
-  open(10, file='input.txt', status='old', action='read')
-  read(10,*)
-  read(10,*) npx, npy, nx, ny
-  close(10)
+  if (command_argument_count() /= 4) then
+    if (rank .eq. 0) then
+      print *, 'Usage: mpirun -np <num_procs> ./solver_parallel npx npy nx ny'
+    end if
+    call MPI_FINALIZE(ierr)
+    stop 1
+  end if
+
+  call get_command_argument(1, arg)
+  read(arg, *) npx
+
+  call get_command_argument(2, arg)
+  read(arg, *) npy
+
+  call get_command_argument(3, arg)
+  read(arg, *) nx
+
+  call get_command_argument(4, arg)
+  read(arg, *) ny
  
   call MPI_COMM_SIZE( MPI_COMM_WORLD, nproc, ierr )
   call MPI_Comm_RANK( COMM_CART, rank, ierr )

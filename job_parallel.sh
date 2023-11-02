@@ -7,4 +7,4 @@ cd "$PBS_O_WORKDIR"
 module load gcc
 module load openmpi-gcc
 
-mpirun -np 6 build/solver_parallel
+mpirun -np 6 build/solver_parallel 3 2 21 21

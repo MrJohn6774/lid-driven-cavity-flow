@@ -1,2 +1,0 @@
-npx  npy   nx   ny
-3     2    21   21
