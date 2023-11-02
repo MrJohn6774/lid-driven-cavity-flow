@@ -18,7 +18,7 @@ def run_solver(npx, npy, nx, ny):
 
     args = [str(arg) for arg in (npx, npy, nx, ny)]
 
-    binary = 'build/gfortran_6FB96CAE7088C0B9/app/solver_parallel'
+    binary = 'build/solver_parallel'
     command = ['mpirun', '-np', str(num_processors), binary] + args
 
     process = subprocess.run(command, check=True)
