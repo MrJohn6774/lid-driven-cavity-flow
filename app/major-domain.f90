@@ -223,8 +223,6 @@
   end do
   time2 = mpi_wtime()
 
-  psi(:,:) = -psi(:,:)
-
   !allocate(u(ny,nx), v(ny,nx))
   !u = 0
   !v = 0
