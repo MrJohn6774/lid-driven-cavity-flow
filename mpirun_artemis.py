@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import concurrent.futures
 
 def move_csv_to_outputs():
     # Ensure the 'outputs' directory exists
@@ -31,12 +30,11 @@ def main():
         (3, 4, 75, 75),
         (3, 4, 100, 100),
         # tests for domain size
+        (4, 2, 50, 50),
         (4, 3, 50, 50),
         (4, 4, 50, 50),
         (4, 5, 50, 50),
         (4, 6, 50, 50),
-        (4, 7, 50, 50),
-        (4, 8, 50, 50),
         # tests for domain topology
         (1, 24, 50, 50),
         (2, 12, 50, 50),
@@ -48,15 +46,11 @@ def main():
         (24, 1, 50, 50),
     ]
 
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        futures = [executor.submit(run_solver, *params) for params in params_list]
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                print(f"An exception occurred: {e}")
+    for params in params_list:
+        print(f'Running with params: {params}')
+        run_solver(*params)
+        move_csv_to_outputs()
 
-    move_csv_to_outputs()
 
 if __name__ == '__main__':
     main()
