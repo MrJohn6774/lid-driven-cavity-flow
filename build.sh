@@ -4,6 +4,7 @@
 module load gcc
 module load openmpi-gcc
 
+rm -rf build/
 mkdir -p build
 
 gfortran -o build/solver_serial -O3 app/main.f90

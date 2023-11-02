@@ -1,4 +1,5 @@
 import subprocess
+import concurrent.futures
 
 def run_solver(npx, npy, nx, ny):
     num_processors = npx * npy
@@ -16,9 +17,13 @@ def main():
         (3, 2, 21, 21),
     ]
 
-    for params in params_list:
-        print(f'Running with params: {params}')
-        run_solver(*params)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [executor.submit(run_solver, *params) for params in params_list]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"An exception occurred: {e}")
 
 if __name__ == '__main__':
     main()
