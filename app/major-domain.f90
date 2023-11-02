@@ -243,7 +243,7 @@
       open(10, file=filename, access='stream')
       do j = ix1, ix2
         do k = iy1, iy2
-          write(10,pos=((j-1)*ny+k-1)*8+1) u(k,j)
+          write(10,pos=((j-1)*ny+k-1)*8+1) psi(k,j)
         end do
       end do
       close(10)
@@ -252,11 +252,11 @@
   end do
   if(rank==0) then
     open(10, file=filename, access='stream')
-    read(10) u(:,:)
+    read(10) psi(:,:)
     close(10,status='delete')
     open(10, file=filename)
     do j = 1, ny
-      write(10,"(*(g0,','))") u(j,:)
+      write(10,"(*(g0,','))") psi(j,:)
     end do
     close(10)
   end if
