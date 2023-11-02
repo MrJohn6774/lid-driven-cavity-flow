@@ -13,7 +13,11 @@ Instead of the traditional make/cmake build system, this project uses Fortran Pa
 
 To build and run the executable
 ```bash
-./fpm run
+# run the serial solver
+./fpm run solver_serial
+
+# run the parallel solver with maximum number of available processors
+./fpm run solver_parallel
 ```
 
 To clean the build files and folders

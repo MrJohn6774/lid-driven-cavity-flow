@@ -18,17 +18,24 @@
   subroutine init()
   implicit none
   call MPI_INIT( ierr )
-  !call MPI_COMM_RANK( MPI_COMM_WORLD, rank, ierr )
 
-  ! read file
+  ! read input parameters
   open(10, file='input.txt', status='old', action='read')
   read(10,*)
   read(10,*) npx, npy, nx, ny
   close(10)
-  
-  nproc = npx * npy
  
   call MPI_COMM_SIZE( MPI_COMM_WORLD, nproc, ierr )
+  call MPI_Comm_RANK( COMM_CART, rank, ierr )
+
+  ! Panic if number of processors does not match npx and npy
+  if (nproc /= npx * npy) then
+    if (rank .eq. 0) then
+      print *, "ERROR! npx*npy does not equal to proc"
+    end if
+    call MPI_FINALIZE(ierr)
+    stop 1
+  end if
  
   
   ! allocate work domain
@@ -38,7 +45,6 @@
   allocate(tempDat(nx)) !tempro data
   ! new doamin 
   call MPI_CART_CREATE(MPI_COMM_WORLD, 2, [npy,npx], [.false., .false.], .true., COMM_CART, ierr)
-  call MPI_Comm_RANK( COMM_CART, rank, ierr )
   call MPI_CART_COORDS( COMM_CART, rank, 2, xyrank, ierr )
   xyrank = xyrank + 1
   ! doamin for different processor
