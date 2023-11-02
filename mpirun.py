@@ -18,18 +18,15 @@ def run_solver(npx, npy, nx, ny):
 
     args = [str(arg) for arg in (npx, npy, nx, ny)]
 
-    binary = 'build/gfortran_6FB96CAE7088C0B9/app/solver_parallel'
+    binary = 'build/solver_parallel'
     command = ['mpirun', '-np', str(num_processors), binary] + args
 
     process = subprocess.run(command, check=True)
 
 def main():
     params_list = [
-        (2, 2, 300, 300),
-        (3, 2, 200, 200),
         (3, 2, 100, 100),
-        (3, 2, 500, 500),
-        (3, 2, 1000, 1000)
+        (3, 2, 200, 200),       
     ]
 
     with concurrent.futures.ProcessPoolExecutor() as executor:

@@ -170,7 +170,7 @@
   tol = 1.0d-3
   dt = 0.25d0*dx*dx/nu
   !dt = min(0.25d0*dx*dx/nu, 4.0d0*nu/Ut/Ut)
-  tend = 4 * dt
+  tend = 400 * dt
   if(rank==0) then
     write(*,"('dt = ', f7.4)") dt
     write(*,"('Reynods = ', f9.4)") Ut*lx/nu
@@ -243,7 +243,7 @@
       open(10, file=filename, access='stream')
       do j = ix1, ix2
         do k = iy1, iy2
-          write(10,pos=((j-1)*ny+k-1)*8+1) psi(k,j)
+          write(10,pos=((j-1)*ny+k-1)*8+1) u(k,j)
         end do
       end do
       close(10)
@@ -252,11 +252,11 @@
   end do
   if(rank==0) then
     open(10, file=filename, access='stream')
-    read(10) psi(:,:)
+    read(10) u(:,:)
     close(10,status='delete')
     open(10, file=filename)
     do j = 1, ny
-      write(10,"(*(g0,','))") psi(j,:)
+      write(10,"(*(g0,','))") u(j,:)
     end do
     close(10)
   end if
