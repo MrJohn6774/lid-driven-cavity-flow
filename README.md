@@ -3,9 +3,9 @@
 ### Project setup
 - a linux environment
 - clone the repository
-- install gfortran
+- install gfortran libopenmpi-dev
 ```bash
-sudo apt update && apt install -y gfortran
+sudo apt update && apt install -y gfortran libopenmpi-dev
 ```
 
 ### Development
@@ -21,6 +21,9 @@ To build and run the executable
 
 # run the parallel solver with mpirun
 mpirun -np 4 build/gfortran_6FB96CAE7088C0B9/app/solver_parallel 2 2 21 21
+
+# run parallel solver in batch with python
+python3 mpirun.py
 ```
 
 To clean the build files and folders

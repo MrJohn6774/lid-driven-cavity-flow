@@ -1,4 +1,5 @@
 build
+outputs
 *.dat
 *.csv
 *.mod
