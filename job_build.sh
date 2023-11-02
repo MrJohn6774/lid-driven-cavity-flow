@@ -1,0 +1,15 @@
+#!/bin/sh
+#PBS -P COMPENG
+#PBS -l select=1:ncpus=1:mem=4GB
+#PBS -l walltime=00:05:00
+
+cd $PBS_O_WORKDIR
+
+# load modules
+module load gcc
+module load openmpi-gcc
+
+mkdir -p build
+
+gfortran -o build/solver_serial -O3 app/main.f90
+mpif90 -o build/solver_parallel -O3 app/major-domain.f90

@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -P PANDORA
+#PBS -P COMPENG
 #PBS -l select=1:ncpus=1:mem=2GB
 #PBS -l walltime=00:01:00
 
