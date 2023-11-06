@@ -1,3 +1,5 @@
+!> This serial version is converted from Prof. Tony Saad's Python implementation of Vorticity-Streamfunction
+!> (https://nbviewer.org/github/saadtony/uCFD/blob/master/Vorticity-Streamfunction%20FDM%20-%20lid-driven%20cavity.ipynb)
 program main
     implicit none
 

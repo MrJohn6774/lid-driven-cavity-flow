@@ -1,8 +1,10 @@
+ !> Extending the work on the serial version, parallelism is implemented with openMPI,
+ !> then the cartesian topology is implemented.
+ !> GPT-4 was employed as a debugging technique. 
+ !----------------------------------------------------------------------------
   module mpi_mod
   implicit none
-
   include 'mpif.h'
-
   integer:: rank=0, nproc, npx, npy
   integer:: COMM_CART, xyrank(2) = 0
   integer:: nx, ny
@@ -14,12 +16,18 @@
   integer, allocatable:: ywork(:) 
   real(8), allocatable:: tempDat(:)
   contains
-
+!--------------------------------------------------------------------
+! subroutine init() included other two subroutine including allocating jobs to different procs
+! and boundary dara exchange.
   !initialize mpi
   subroutine init()
   implicit none
   call MPI_INIT( ierr )
 
+!------------------------------------------------------
+!> This part of the code is using a get_command_argument command
+!> to read the input parameters (npx, npy, nx and ny) and cast them to their respective types
+!------------------------------------------------------
   ! read input parameters
   if (command_argument_count() /= 4) then
     if (rank .eq. 0) then
@@ -28,22 +36,16 @@
     call MPI_FINALIZE(ierr)
     stop 1
   end if
-
   call get_command_argument(1, arg)
   read(arg, *) npx
-
   call get_command_argument(2, arg)
   read(arg, *) npy
-
   call get_command_argument(3, arg)
   read(arg, *) nx
-
   call get_command_argument(4, arg)
-  read(arg, *) ny
- 
+  read(arg, *) ny 
   call MPI_COMM_SIZE( MPI_COMM_WORLD, nproc, ierr )
-  call MPI_Comm_RANK( COMM_CART, rank, ierr )
-
+  call MPI_Comm_RANK( COMM_CART, rank, ierr ) 
   ! Panic if number of processors does not match npx and npy
   if (nproc /= npx * npy) then
     if (rank .eq. 0) then
@@ -52,16 +54,24 @@
     call MPI_FINALIZE(ierr)
     stop 1
   end if
- 
-  
+!-------------------------------------------------------
   ! allocate work domain
+! allocate xwork as (npx+1) and ywork as (npy+1) as these are the boundary number of each domain 
   allocate(xwork(npx+1), ywork(npy+1))
+! use subroutine to allocate task--[xwork (nx-2, boundary data not considered)] to different processor
   call distributeWork(xwork, npx, nx-2)
   call distributeWork(ywork, npy, ny-2)
+  
+  
+! To improve efficiency, we use temporary data storage to save the data in 
+! rows (discontinuous data) and then transform it into columns (continuous data)."
   allocate(tempDat(nx)) !tempro data
+  
+! use cartesian topology to decomposet the domain 
   ! new doamin 
   call MPI_CART_CREATE(MPI_COMM_WORLD, 2, [npy,npx], [.false., .false.], .true., COMM_CART, ierr)
   call MPI_CART_COORDS( COMM_CART, rank, 2, xyrank, ierr )
+! change to a 1 start rank
   xyrank = xyrank + 1
   ! doamin for different processor
   ix1 = xwork(xyrank(2))
@@ -72,7 +82,11 @@
   call MPI_CART_SHIFT(COMM_CART, 0, 1, DR, UR, ierr) ! down and up
   call MPI_CART_SHIFT(COMM_CART, 1, 1, LR, RR, ierr) ! left and right
   end subroutine
+!-------------------------------------------------------------------------------
 
+
+! distributeWork subdomain----divid the nwork (nodes-2) by nproc and showing the
+! boundary of each sub domain by work array.
   !allocate task to different processor
   pure subroutine distributeWork(work, nproc, nwork)
   ! [work(i-1), work(i)-1]
@@ -80,23 +94,34 @@
   integer, intent(in):: nproc, nwork
   integer, intent(out):: work(:)
   integer i, m, n
+  
+! work start at second node, and use nwork/ nproc determin the nodes in each proc
+! if mod().NE. zero, the rest of the code will put the remainding node evenly in to the 
+! first several number in work array.
+! if mod() .EQ. zero, work(2:1) is invalid and will have no effect on work array.
+! finally, the upper limit and lower limit in each processor is determained by add 
+! work array together
   work(1) = 2 !row two start
   work(2:) = nwork / nproc
   i = mod(nwork,nproc) + 1
   work(2:i) = work(2:i) + 1
   do i = 2, nproc+1
-  
     work(i) = work(i) + work(i-1)
   end do
   end subroutine
+!---------------------------------------------------------------------------
 
+
+! exchanging the data on each subdomain boundary to compute the data on boundary 
   subroutine exchangeBoundaryData(nx, ny, d)
+  
   implicit none
   integer, intent(in):: nx, ny
   real(8), intent(inout):: d(ny,nx)
   integer status(MPI_STATUS_SIZE)
   ! send and receive boundary data
-  ! U direction
+! the tempdat is used here to save the data in row direction 
+ ! U direction
   if(UR>=0) then
     tempDat(ix1:ix2) = d(iy2,ix1:ix2)
     call MPI_Send(tempDat(ix1:ix2), ix2-ix1+1, MPI_REAL8, UR, 1, COMM_CART, ierr)
@@ -115,7 +140,7 @@
     call MPI_Recv(tempDat(ix1:ix2), ix2-ix1+1, MPI_REAL8, UR, 2, COMM_CART, status, ierr)
     d(iy2+1,ix1:ix2) = tempDat(ix1:ix2)
   end if
-
+! as data in left and right dirction is in column (continuous data) so don't need tempdat
   ! L direction
   if(LR>=0) call MPI_Send(d(iy1:iy2,ix1), iy2-iy1+1, MPI_REAL8, LR, 3, COMM_CART, ierr)
   if(RR>=0) call MPI_Recv(d(iy1:iy2,ix2+1), iy2-iy1+1, MPI_REAL8, RR, 3, COMM_CART, status, ierr)
@@ -126,7 +151,13 @@
   end subroutine
 
   end module
+!--------------------------------------------------------------------------------
 
+
+
+! the main coding part, the discretised equation and main loop structure is using the 
+! Vorticity-Streamfunction FD Python written by Prof. Tony Saad
+! (https://nbviewer.org/github/saadtony/uCFD/blob/master/Vorticity-Streamfunction%20FDM%20-%20lid-driven%20cavity.ipynb)
   program solver_parallel
   use mpi_mod
   implicit none
@@ -168,6 +199,7 @@
   beta = 1.5d0
   nu = 0.05d0
   tol = 1.0d-3
+! dt has been set to a upper limit value of stable result
   dt = 0.25d0*dx*dx/nu
   !dt = min(0.25d0*dx*dx/nu, 4.0d0*nu/Ut/Ut)
   tend = 400 * dt
@@ -193,6 +225,7 @@
       end do
       ! send message
       rhs = err
+! computing global error by Allreduce 
       call MPI_Allreduce(rhs, err, 1, MPI_REAL8, MPI_SUM, MPI_Comm_World, ierr)
       err = sqrt( err )
       if(err<tol) exit
@@ -230,10 +263,16 @@
   u(ny, 2:nx-1) = Ut
   u(2:ny-1, 2:nx-1) = (psi(3:ny, 2:nx-1)-psi(1:ny-2, 2:nx-1)) / 2.0d0 / dy
   v(2:ny-1, 2:nx-1) = -(psi(2:ny-1, 3:nx) - psi(2:ny-1, 1:nx-2)) / 2.0d0 / dx
+!-------------------------------------------------------------------------
 
+
+
+
+! based on the http://fcode.cn/guide-86-1.html (Fortran流文件-读写二进制任意位置), the data 
+! is initially put into a stream file with binary data, and then conver to a CSV file.
   ! output data
   write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') 'psi_', npx, '-', npy, '_', nx, '-', ny, '.csv'
-
+! add boundary data to the main array
   if(xyrank(1)==1) iy1 = 1
   if(xyrank(1)==npy) iy2 = ny
   if(xyrank(2)==1) ix1 = 1
