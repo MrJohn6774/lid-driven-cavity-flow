@@ -55,6 +55,11 @@ More info on FPM can be found [here](https://github.com/fortran-lang/fpm)
 
 Debugging is supported in VS Code. Install `gdb` and the recommended VS Code extensions
 
+### Results (at 400 time steps)
+| Velocity Field | Streamlines |
+|----------------|-------------|
+| ![Velocity Field](./results/velocity_field.png) | ![Streamline](./results/psi_contour.png) |
+
 ### Resources
 - [Learn Fortran](https://fortran-lang.org/learn/)
 - [Git User Guide](https://sydneyuni.atlassian.net/wiki/spaces/RC/pages/229277917/Git+-+What+you+need+to+know)
